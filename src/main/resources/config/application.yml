@@ -1,0 +1,31 @@
+spring:
+  application.name: contract-service
+
+logging:
+  pattern.console: '[%date{"yyyy-MM-dd''T''HH:mm:ss,SSSXXX"}] [%thread] [%X{traceId:-},%X{spanId:-}] %level %logger - %msg%n'
+  level:
+    org.eshishkin.edu.demospringnative: DEBUG
+
+spring.data.mongodb:
+  uri: 'mongodb://mongo-service:27017'
+  database: 'credits'
+
+management:
+  endpoints.web:
+    base-path: /admin
+    exposure.include: health,info,env,prometheus,metrics
+  endpoint:
+    metrics.enabled: true
+    prometheus.enabled: true
+    metrics.export.prometheus.enabled: true
+    health:
+      livenessstate.enabled: true
+      readinessstate.enabled: true
+      show-details: always
+      show-components: always
+      probes.enabled: true
+      group:
+        readiness:
+          include: mongo
+          show-components: always
+          show-details: always
