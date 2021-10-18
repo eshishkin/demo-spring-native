@@ -12,7 +12,7 @@ services:
           - mongo-service
 
   contract-app:
-    image: eshishkin/demo/spring-native
+    image: eshishkin/demo/spring-native/tiny
     mem_limit: 650m
     expose:
       - "8080"
@@ -20,6 +20,8 @@ services:
       - "18080:8080"
     environment:
       - JAVA_TOOL_OPTIONS=-Xms128m -Xmx128m -XX:MaxMetaspaceSize=100M -XX:ReservedCodeCacheSize=128M -XX:+UseContainerSupport -XX:+AlwaysActAsServerClassMachine -XX:+AlwaysPreTouch
+    depends_on:
+      - mongo
     networks:
       backend:
         aliases:

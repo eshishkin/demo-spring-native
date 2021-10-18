@@ -93,12 +93,11 @@
 					</excludes>
 					<classifier>${repackage.classifier}</classifier>
 					<image>
-						<builder>paketobuildpacks/builder:base</builder>
-						<name>eshishkin/demo/spring-native</name>
+						<builder>paketobuildpacks/builder:tiny</builder>
+						<name>eshishkin/demo/spring-native/tiny</name>
 						<verboseLogging>true</verboseLogging>
 						<env>
-							<BP_NATIVE_IMAGE>false</BP_NATIVE_IMAGE>
-							<BPL_DEBUG_ENABLED>false</BPL_DEBUG_ENABLED>
+							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
 						</env>
 					</image>
 				</configuration>
@@ -107,6 +106,12 @@
 				<groupId>org.springframework.experimental</groupId>
 				<artifactId>spring-aot-maven-plugin</artifactId>
 				<version>${spring-native.version}</version>
+				<configuration>
+					<removeSpelSupport>true</removeSpelSupport>
+					<removeJmxSupport>true</removeJmxSupport>
+					<removeXmlSupport>true</removeXmlSupport>
+					<removeUnusedConfig>true</removeUnusedConfig>
+				</configuration>
 				<executions>
 					<execution>
 						<id>test-generate</id>
