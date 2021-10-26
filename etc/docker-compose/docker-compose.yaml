@@ -11,21 +11,83 @@ services:
         aliases:
           - mongo-service
 
-  contract-app:
-    image: eshishkin/demo/spring-native/tiny
+  contract-app-native:
+    image: eshishkin/demo/spring-native/base-debug
     mem_limit: 650m
     expose:
       - "8080"
     ports:
       - "18080:8080"
-    environment:
-      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx128m -XX:MaxMetaspaceSize=100M -XX:ReservedCodeCacheSize=128M -XX:+UseContainerSupport -XX:+AlwaysActAsServerClassMachine -XX:+AlwaysPreTouch
+      - "18000:8000"
+      - "15000:5000"
+    command: [
+      "-Xms128m",
+      "-Xmx128m",
+      "-XX:+PrintGC",
+      "-XX:+PrintGCSummary",
+      "-XX:+PrintGCTimeStamps",
+#      "-XX:+VerboseGC",
+    ]
     depends_on:
       - mongo
     networks:
+      - backend
+
+  contract-app-jvm:
+    image: eshishkin/demo/spring-native/jvm
+    mem_limit: 650m
+    expose:
+      - "8080"
+    ports:
+      - "28080:8080"
+      - "28000:8000"
+      - "25000:5000"
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx128m -XX:MaxMetaspaceSize=100M -XX:ReservedCodeCacheSize=128M -XX:+UseContainerSupport -XX:+AlwaysActAsServerClassMachine -XX:+AlwaysPreTouch
+      - BPL_JMX_ENABLED=true
+      - BPL_DEBUG_ENABLED=true
+    depends_on:
+      - mongo
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/config.yml:/etc/prometheus/prometheus.yml
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    expose:
+      - 9090
+    ports:
+      - 9090:9090
+    networks:
       backend:
         aliases:
-          - contract-service
+          - prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - 38080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:7.1.5
+    ports:
+      - 3000:3000
+    command: "--config=/etc/grafana/custom/custom.ini"
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/settings:/etc/grafana/custom
+    networks:
+      - backend
 
 networks:
   backend:

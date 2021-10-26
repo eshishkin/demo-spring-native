@@ -1,0 +1,27 @@
+global:
+  scrape_interval:     15s
+
+scrape_configs:
+
+  - job_name: contract-service-native
+    scrape_interval: 5s
+    metrics_path: "/admin/prometheus"
+    static_configs:
+      - targets:
+        - contract-service-native:8080
+
+  - job_name: cadvisor
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - cadvisor:8080
+    metric_relabel_configs:
+      - source_labels: [ id ]
+        action: keep
+        regex: '/docker/(.*)'
+
+      - source_labels: [container_label_com_docker_compose_service]
+        target_label: docker_compose_service
+
+      - regex: container_.*|image
+        action: labeldrop
