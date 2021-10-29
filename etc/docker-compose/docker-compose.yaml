@@ -3,39 +3,50 @@ version: "2"
 services:
   mongo:
     image: mongo:4.2.7
-    mem_limit: 64m
+    mem_limit: 1g
+    cpus: 0.5
     expose:
       - "27017"
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo/startup.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       backend:
         aliases:
           - mongo-service
 
   contract-app-native:
-    image: eshishkin/demo/spring-native/base-debug
+    image: eshishkin/demo/spring-native/tiny
     mem_limit: 650m
+    cpus: 0.5
     expose:
       - "8080"
     ports:
       - "18080:8080"
-      - "18000:8000"
-      - "15000:5000"
     command: [
       "-Xms128m",
       "-Xmx128m",
-      "-XX:+PrintGC",
-      "-XX:+PrintGCSummary",
-      "-XX:+PrintGCTimeStamps",
+#      "-XX:+PrintGC",
+#      "-XX:+PrintGCSummary",
+#      "-XX:+PrintGCTimeStamps",
 #      "-XX:+VerboseGC",
+      "-XX:+FlightRecorder",
+      "-XX:StartFlightRecording=filename=/tmp/jfr/recording.jfr",
     ]
+    volumes:
+      - ./data/jfr:/tmp/jfr
     depends_on:
       - mongo
     networks:
-      - backend
+      backend:
+        aliases:
+          - contract-service-native
 
   contract-app-jvm:
     image: eshishkin/demo/spring-native/jvm
     mem_limit: 650m
+    cpus: 0.5
     expose:
       - "8080"
     ports:
@@ -49,12 +60,16 @@ services:
     depends_on:
       - mongo
     networks:
-      - backend
+      backend:
+        aliases:
+          - contract-service-jvm
 
   prometheus:
     image: prom/prometheus:latest
+    cpus: 0.2
     volumes:
       - ./prometheus/config.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/prometheus/data
     command: "--config.file=/etc/prometheus/prometheus.yml"
     expose:
       - 9090
@@ -65,8 +80,18 @@ services:
         aliases:
           - prometheus
 
+  node-exporter:
+    image: prom/node-exporter:latest
+    expose:
+      - 9100
+    networks:
+      backend:
+        aliases:
+          - node-exporter
+
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
+    cpus: 0.25
     ports:
       - 38080:8080
     volumes:
@@ -74,6 +99,10 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    command: [
+        '--housekeeping_interval=1s',
+        '-docker_only=true'
+    ]
     networks:
       - backend
 
