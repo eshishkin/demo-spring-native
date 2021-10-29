@@ -35,9 +35,8 @@ public class ContractController {
         return contractService.getSummary(customer);
     }
 
-
     @PostMapping("/random")
-    public List<Contract> generateTestData(@RequestParam("size") int size) {
-        return contractService.generateTestData(size);
+    public void generateTestData(@RequestParam("size") int size) {
+        contractService.generateTestData(size);
     }
 }

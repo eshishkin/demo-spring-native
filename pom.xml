@@ -72,6 +72,10 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
@@ -84,6 +88,32 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.springframework.experimental</groupId>
+                <artifactId>spring-aot-maven-plugin</artifactId>
+                <version>${spring-native.version}</version>
+                <configuration>
+                    <removeSpelSupport>${artifact.image.native.spel.deleted}</removeSpelSupport>
+                    <removeXmlSupport>${artifact.image.native.xml.deleted}</removeXmlSupport>
+                    <removeYamlSupport>${artifact.image.native.yaml.deleted}</removeYamlSupport>
+                    <removeJmxSupport>${artifact.image.native.jmx.deleted}</removeJmxSupport>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>test-generate</id>
+                        <goals>
+                            <goal>test-generate</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -121,6 +151,11 @@
                 <artifact.image.name>eshishkin/demo/spring-native/jvm</artifact.image.name>
                 <artifact.image.native>false</artifact.image.native>
                 <artifact.builder.args/>
+
+                <artifact.image.native.jmx.deleted>true</artifact.image.native.jmx.deleted>
+                <artifact.image.native.yaml.deleted>true</artifact.image.native.yaml.deleted>
+                <artifact.image.native.xml.deleted>true</artifact.image.native.xml.deleted>
+                <artifact.image.native.spel.deleted>true</artifact.image.native.spel.deleted>
             </properties>
         </profile>
 
@@ -131,79 +166,30 @@
                 <artifact.image.name>eshishkin/demo/spring-native/base-debug</artifact.image.name>
                 <artifact.image.native>true</artifact.image.native>
                 <artifact.builder.args>
-                    -g --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:GenerateDebugInfo=1
+                    -g --verbose -H:+AllowVMInspection -H:+ReportExceptionStackTraces -H:+PrintClassInitialization
                 </artifact.builder.args>
+                <artifact.image.native.jmx.deleted>false</artifact.image.native.jmx.deleted>
+                <artifact.image.native.yaml.deleted>false</artifact.image.native.yaml.deleted>
+                <artifact.image.native.xml.deleted>false</artifact.image.native.xml.deleted>
+                <artifact.image.native.spel.deleted>false</artifact.image.native.spel.deleted>
             </properties>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.experimental</groupId>
-                        <artifactId>spring-aot-maven-plugin</artifactId>
-                        <version>${spring-native.version}</version>
-                        <configuration>
-                            <removeSpelSupport>true</removeSpelSupport>
-                            <removeXmlSupport>true</removeXmlSupport>
-                            <removeUnusedConfig>true</removeUnusedConfig>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>test-generate</id>
-                                <goals>
-                                    <goal>test-generate</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>generate</id>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
 
         <profile>
-            <id>native-prod</id>
+            <id>native-prod-tiny</id>
             <properties>
                 <artifact.builder.name>paketobuildpacks/builder:tiny</artifact.builder.name>
                 <artifact.image.name>eshishkin/demo/spring-native/tiny</artifact.image.name>
                 <artifact.image.native>true</artifact.image.native>
                 <artifact.builder.args>
-                    --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization
+                    --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+AllowVMInspection
                 </artifact.builder.args>
+                <artifact.image.native.jmx.deleted>true</artifact.image.native.jmx.deleted>
+                <artifact.image.native.yaml.deleted>true</artifact.image.native.yaml.deleted>
+                <artifact.image.native.xml.deleted>true</artifact.image.native.xml.deleted>
+                <artifact.image.native.spel.deleted>true</artifact.image.native.spel.deleted>
             </properties>
 
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.experimental</groupId>
-                        <artifactId>spring-aot-maven-plugin</artifactId>
-                        <version>${spring-native.version}</version>
-                        <configuration>
-                            <removeSpelSupport>true</removeSpelSupport>
-                            <removeXmlSupport>true</removeXmlSupport>
-                            <removeUnusedConfig>true</removeUnusedConfig>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>test-generate</id>
-                                <goals>
-                                    <goal>test-generate</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>generate</id>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 
