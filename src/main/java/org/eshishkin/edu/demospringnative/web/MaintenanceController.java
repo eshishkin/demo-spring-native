@@ -1,11 +1,14 @@
 package org.eshishkin.edu.demospringnative.web;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.OperatingSystemMXBean;
 
 @Slf4j
 @RestController
@@ -13,16 +16,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/maintenance")
 public class MaintenanceController {
 
-    @PostMapping("/heap-dump")
-    public void createHeapDump() {
-        dump();
+    @GetMapping("/jmx")
+    public String jmx() {
+        OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+        return new StringBuilder()
+                .append("Processors: ").append(operatingSystemMXBean.getAvailableProcessors()).append("\n")
+                .append("Name: ").append(operatingSystemMXBean.getName()).append("\n")
+                .append("Arch: ").append(operatingSystemMXBean.getArch()).append("\n")
+                .append("Version: ").append(operatingSystemMXBean.getVersion()).append("\n")
+                .append("Class: ").append(operatingSystemMXBean.getClass()).append("\n")
+                .append("\n")
+                .append("Heap Usage: ").append(memoryMXBean != null ? memoryMXBean.getHeapMemoryUsage() : null).append("\n")
+                .append("Nonheap Usage: ").append(memoryMXBean != null ? memoryMXBean.getNonHeapMemoryUsage() : null).append("\n")
+                .toString();
     }
 
-
-    @SneakyThrows
-    private void dump() {
-//        File file = File.createTempFile("SVMHeapDump-", ".hprof");
-//        VMRuntime.dumpHeap(file.getAbsolutePath(), true);
-//        log.info("Heap dump created " + file.getAbsolutePath() + ", size: " + file.length());
-    }
 }

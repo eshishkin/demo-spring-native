@@ -1,23 +1,34 @@
 version: "2"
 
 services:
-  mongo:
+  mongo-jvm:
     image: mongo:4.2.7
-    mem_limit: 1g
-    cpus: 0.5
+    mem_limit: 500m
+    cpus: 0.25
     expose:
       - "27017"
-    ports:
-      - "27017:27017"
     volumes:
       - ./mongo/startup.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       backend:
         aliases:
-          - mongo-service
+          - mongo-service-jvm
 
-  contract-app-native:
-    image: eshishkin/demo/spring-native/tiny
+  mongo-native:
+    image: mongo:4.2.7
+    mem_limit: 500m
+    cpus: 0.25
+    expose:
+      - "27017"
+    volumes:
+      - ./mongo/startup.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      backend:
+        aliases:
+          - mongo-service-native
+
+  contract-app-native-blocking:
+    image: eshishkin/demo/spring-native/tiny-blocking
     mem_limit: 650m
     cpus: 0.5
     expose:
@@ -33,18 +44,19 @@ services:
 #      "-XX:+VerboseGC",
       "-XX:+FlightRecorder",
       "-XX:StartFlightRecording=filename=/tmp/jfr/recording.jfr",
+      "--spring.data.mongodb.uri=mongodb://mongo-service-native:27017",
     ]
     volumes:
       - ./data/jfr:/tmp/jfr
     depends_on:
-      - mongo
+      - mongo-native
     networks:
       backend:
         aliases:
           - contract-service-native
 
-  contract-app-jvm:
-    image: eshishkin/demo/spring-native/jvm
+  contract-app-jvm-blocking:
+    image: eshishkin/demo/spring-native/jvm-blocking
     mem_limit: 650m
     cpus: 0.5
     expose:
@@ -54,11 +66,14 @@ services:
       - "28000:8000"
       - "25000:5000"
     environment:
-      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx128m -XX:MaxMetaspaceSize=100M -XX:ReservedCodeCacheSize=128M -XX:+UseContainerSupport -XX:+AlwaysActAsServerClassMachine -XX:+AlwaysPreTouch
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx128m -XX:MaxMetaspaceSize=100M -XX:ReservedCodeCacheSize=60M -XX:+UseContainerSupport -XX:+AlwaysActAsServerClassMachine -XX:+AlwaysPreTouch
       - BPL_JMX_ENABLED=true
       - BPL_DEBUG_ENABLED=true
+    command: [
+        "--spring.data.mongodb.uri=mongodb://mongo-service-jvm:27017",
+    ]
     depends_on:
-      - mongo
+      - mongo-jvm
     networks:
       backend:
         aliases:
@@ -66,7 +81,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    cpus: 0.2
+    cpus: 0.25
     volumes:
       - ./prometheus/config.yml:/etc/prometheus/prometheus.yml
       - ./data/prometheus:/prometheus/data
@@ -79,15 +94,6 @@ services:
       backend:
         aliases:
           - prometheus
-
-  node-exporter:
-    image: prom/node-exporter:latest
-    expose:
-      - 9100
-    networks:
-      backend:
-        aliases:
-          - node-exporter
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -111,6 +117,9 @@ services:
     ports:
       - 3000:3000
     command: "--config=/etc/grafana/custom/custom.ini"
+    depends_on:
+      - cadvisor
+      - prometheus
     volumes:
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards

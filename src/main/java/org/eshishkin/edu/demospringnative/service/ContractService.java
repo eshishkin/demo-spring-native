@@ -3,14 +3,12 @@ package org.eshishkin.edu.demospringnative.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.eshishkin.edu.demospringnative.exception.ResourceNotFoundException;
 import org.eshishkin.edu.demospringnative.model.Contract;
 import org.eshishkin.edu.demospringnative.model.CustomerSummary;
 import org.eshishkin.edu.demospringnative.model.CustomerSummary.ContractSummary;
 import org.eshishkin.edu.demospringnative.persistence.model.ContractEntity;
 import org.eshishkin.edu.demospringnative.persistence.repo.ContractRepository;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 public class ContractService {
     private static final int MAX_CONTRACT_LENGTH = 30;
-    private static final int MAX_CONTRACT_FOR_CUSTOMER = 10;
+    private static final int MAX_CONTRACT_FOR_CUSTOMER = 5;
     private static final int MAX_DEBT_VALUE = 1000000;
 
     private final ContractRepository contractRepository;
@@ -44,9 +42,7 @@ public class ContractService {
                 .collect(toList());
     }
 
-    @Cacheable
     public CustomerSummary getSummary(String customer) {
-        log.trace("Requesting summary for customer {}", customer);
         var contracts = contractRepository.findAllByCustomer(customer)
                 .stream()
                 .map(contract -> {
@@ -74,11 +70,11 @@ public class ContractService {
 
         var random = new Random();
         var records = IntStream.range(0, size)
-                .flatMap(i -> IntStream.range(1, random.nextInt(MAX_CONTRACT_FOR_CUSTOMER)).map(j -> i))
+                .flatMap(i -> IntStream.range(1, MAX_CONTRACT_FOR_CUSTOMER).map(j -> i))
                 .mapToObj(i -> {
                     ContractEntity entity = new ContractEntity();
                     entity.setContract(RandomStringUtils.randomAlphabetic(MAX_CONTRACT_LENGTH).toUpperCase());
-                    entity.setCustomer(StringUtils.leftPad(String.valueOf(i), 4, "0"));
+                    entity.setCustomer(String.valueOf(i));
                     entity.setDebt(new BigDecimal(Math.abs(random.nextInt(MAX_DEBT_VALUE))));
                     entity.setFine(new BigDecimal(Math.abs(random.nextInt(MAX_DEBT_VALUE))));
                     entity.setCommission(new BigDecimal(Math.abs(random.nextInt(MAX_DEBT_VALUE))));

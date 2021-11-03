@@ -40,10 +40,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
         <dependency>
@@ -70,10 +66,6 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -148,7 +140,7 @@
             </activation>
             <properties>
                 <artifact.builder.name>paketobuildpacks/builder:base</artifact.builder.name>
-                <artifact.image.name>eshishkin/demo/spring-native/jvm</artifact.image.name>
+                <artifact.image.name>eshishkin/demo/spring-native/jvm-blocking</artifact.image.name>
                 <artifact.image.native>false</artifact.image.native>
                 <artifact.builder.args/>
 
@@ -163,7 +155,7 @@
             <id>native-debug</id>
             <properties>
                 <artifact.builder.name>paketobuildpacks/builder:base</artifact.builder.name>
-                <artifact.image.name>eshishkin/demo/spring-native/base-debug</artifact.image.name>
+                <artifact.image.name>eshishkin/demo/spring-native/base-debug-blocking</artifact.image.name>
                 <artifact.image.native>true</artifact.image.native>
                 <artifact.builder.args>
                     -g --verbose -H:+AllowVMInspection -H:+ReportExceptionStackTraces -H:+PrintClassInitialization
@@ -179,7 +171,7 @@
             <id>native-prod-tiny</id>
             <properties>
                 <artifact.builder.name>paketobuildpacks/builder:tiny</artifact.builder.name>
-                <artifact.image.name>eshishkin/demo/spring-native/tiny</artifact.image.name>
+                <artifact.image.name>eshishkin/demo/spring-native/tiny-blocking</artifact.image.name>
                 <artifact.image.native>true</artifact.image.native>
                 <artifact.builder.args>
                     --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+AllowVMInspection
