@@ -27,6 +27,19 @@ services:
         aliases:
           - mongo-service-native
 
+  mongo-liberica:
+    image: mongo:4.2.7
+    mem_limit: 500m
+    cpus: 0.25
+    expose:
+      - "27017"
+    volumes:
+      - ./mongo/startup.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      backend:
+        aliases:
+          - mongo-service-liberica
+
   contract-app-native-blocking:
     image: eshishkin/demo/spring-native/tiny-blocking
     mem_limit: 650m
@@ -42,18 +55,44 @@ services:
 #      "-XX:+PrintGCSummary",
 #      "-XX:+PrintGCTimeStamps",
 #      "-XX:+VerboseGC",
-      "-XX:+FlightRecorder",
-      "-XX:StartFlightRecording=filename=/tmp/jfr/recording.jfr",
+#      "-XX:+FlightRecorder",
+#      "-XX:StartFlightRecording=filename=/tmp/jfr/recording.jfr",
       "--spring.data.mongodb.uri=mongodb://mongo-service-native:27017",
     ]
-    volumes:
-      - ./data/jfr:/tmp/jfr
+#    volumes:
+#      - ./data/jfr:/tmp/jfr
     depends_on:
       - mongo-native
     networks:
       backend:
         aliases:
           - contract-service-native
+
+  contract-app-liberica-blocking:
+    image: eshishkin/demo/spring-native/liberica-nik-blocking
+    mem_limit: 650m
+    cpus: 0.5
+    expose:
+      - "8080"
+    ports:
+      - "38080:8080"
+    command: [
+        "-Xms128m",
+        "-Xmx128m",
+#      "-XX:+PrintGC",
+#      "-XX:+PrintGCSummary",
+#      "-XX:+PrintGCTimeStamps",
+#      "-XX:+VerboseGC",
+#        "-XX:+FlightRecorder",
+#        "-XX:StartFlightRecording=filename=/tmp/jfr/recording.jfr",
+        "--spring.data.mongodb.uri=mongodb://mongo-service-liberica:27017",
+    ]
+    depends_on:
+      - mongo-liberica
+    networks:
+      backend:
+        aliases:
+          - contract-service-liberica
 
   contract-app-jvm-blocking:
     image: eshishkin/demo/spring-native/jvm-blocking
@@ -98,8 +137,6 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     cpus: 0.25
-    ports:
-      - 38080:8080
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw

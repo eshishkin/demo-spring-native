@@ -183,6 +183,41 @@
             </properties>
 
         </profile>
+
+        <profile>
+            <id>liberica</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <!-- Avoid a clash between Spring Boot repackaging and native-maven-plugin -->
+                <repackage.classifier>exec</repackage.classifier>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.9.7.1</version>
+                        <configuration>
+                            <imageName>${project.artifactId}</imageName>
+                            <mainClass>org.eshishkin.edu.demospringnative.DemoSpringNativeApplication</mainClass>
+                            <buildArgs>
+                                <buildArg>--verbose</buildArg>
+                            </buildArgs>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <repositories>
