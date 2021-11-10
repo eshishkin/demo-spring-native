@@ -1,0 +1,35 @@
+FROM debian:stable-slim AS builder
+ARG PROFILE=enterprise-g1
+
+COPY distr/graalvm.tar.gz graalvm.tar.gz
+COPY distr/native-image.jar native-image.jar
+RUN mkdir /opt/graal \
+    && tar -xvf graalvm.tar.gz -C /opt/graal --strip-components=1 \
+    && apt-get update \
+    && apt-get install wget -y \
+    && mkdir /opt/maven \
+    && wget https://archive.apache.org/dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz -O - | tar xz -C /opt/maven --strip-components=1 \
+    && /opt/graal/bin/gu -L install native-image.jar \
+    && rm graalvm.tar.gz native-image.jar
+
+RUN apt-get install build-essential libz-dev zlib1g-dev -y
+
+ENV JAVA_HOME /opt/graal
+ENV M2_HOME=/opt/maven
+ENV PATH=${M2_HOME}/bin:${PATH}
+ENV PATH=${JAVA_HOME}/bin:${PATH}
+
+WORKDIR project
+
+COPY pom.xml pom.xml
+COPY src src
+RUN mvn -P$PROFILE -f pom.xml -B de.qaware.maven:go-offline-maven-plugin:1.2.5:resolve-dependencies
+RUN mvn clean package -P$PROFILE
+
+
+FROM paketobuildpacks/run:tiny-cnb
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+COPY --from=builder /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so.1
+COPY --from=builder /project/target/demo-spring-native application
+
+ENTRYPOINT ["/application"]

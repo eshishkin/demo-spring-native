@@ -11,6 +11,7 @@ scrape_configs:
         - contract-service-native:8080
         - contract-service-jvm:8080
         - contract-service-liberica:8080
+        - contract-service-native-ee:8080
 
   - job_name: cadvisor
     scrape_interval: 5s

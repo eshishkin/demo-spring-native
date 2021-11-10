@@ -40,6 +40,19 @@ services:
         aliases:
           - mongo-service-liberica
 
+  mongo-native-ee:
+    image: mongo:4.2.7
+    mem_limit: 500m
+    cpus: 0.25
+    expose:
+      - "27017"
+    volumes:
+      - ./mongo/startup.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      backend:
+        aliases:
+          - mongo-service-native-ee
+
   contract-app-native-blocking:
     image: eshishkin/demo/spring-native/tiny-blocking
     mem_limit: 650m
@@ -117,6 +130,28 @@ services:
       backend:
         aliases:
           - contract-service-jvm
+
+  contract-app-native-ee:
+    image: eshishkin/demo/spring-native/enterprise-g1
+    mem_limit: 650m
+    cpus: 0.5
+    expose:
+      - "8080"
+    ports:
+      - "48080:8080"
+    command: [
+        "-Xms128m",
+        "-Xmx128m",
+#        "-XX:+PrintGC",
+#        "-XX:+VerboseGC",
+        "--spring.data.mongodb.uri=mongodb://mongo-service-native-ee:27017",
+    ]
+    depends_on:
+      - mongo-native-ee
+    networks:
+      backend:
+        aliases:
+          - contract-service-native-ee
 
   prometheus:
     image: prom/prometheus:latest

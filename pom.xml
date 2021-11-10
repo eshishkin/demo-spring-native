@@ -19,6 +19,12 @@
         <repackage.classifier/>
         <spring-cloud.version>2020.0.4</spring-cloud.version>
         <spring-native.version>0.10.4</spring-native.version>
+        <native.plugin.version>0.9.7.1</native.plugin.version>
+
+        <artifact.image.native.jmx.deleted>true</artifact.image.native.jmx.deleted>
+        <artifact.image.native.yaml.deleted>true</artifact.image.native.yaml.deleted>
+        <artifact.image.native.xml.deleted>true</artifact.image.native.xml.deleted>
+        <artifact.image.native.spel.deleted>true</artifact.image.native.spel.deleted>
     </properties>
 
     <dependencyManagement>
@@ -143,11 +149,6 @@
                 <artifact.image.name>eshishkin/demo/spring-native/jvm-blocking</artifact.image.name>
                 <artifact.image.native>false</artifact.image.native>
                 <artifact.builder.args/>
-
-                <artifact.image.native.jmx.deleted>true</artifact.image.native.jmx.deleted>
-                <artifact.image.native.yaml.deleted>true</artifact.image.native.yaml.deleted>
-                <artifact.image.native.xml.deleted>true</artifact.image.native.xml.deleted>
-                <artifact.image.native.spel.deleted>true</artifact.image.native.spel.deleted>
             </properties>
         </profile>
 
@@ -176,12 +177,7 @@
                 <artifact.builder.args>
                     --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+AllowVMInspection
                 </artifact.builder.args>
-                <artifact.image.native.jmx.deleted>true</artifact.image.native.jmx.deleted>
-                <artifact.image.native.yaml.deleted>true</artifact.image.native.yaml.deleted>
-                <artifact.image.native.xml.deleted>true</artifact.image.native.xml.deleted>
-                <artifact.image.native.spel.deleted>true</artifact.image.native.spel.deleted>
             </properties>
-
         </profile>
 
         <profile>
@@ -197,12 +193,49 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.9.7.1</version>
+                        <version>${native.plugin.version}</version>
                         <configuration>
                             <imageName>${project.artifactId}</imageName>
                             <mainClass>org.eshishkin.edu.demospringnative.DemoSpringNativeApplication</mainClass>
                             <buildArgs>
                                 <buildArg>--verbose</buildArg>
+                            </buildArgs>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>enterprise-g1</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <!-- Avoid a clash between Spring Boot repackaging and native-maven-plugin -->
+                <repackage.classifier>exec</repackage.classifier>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native.plugin.version}</version>
+                        <configuration>
+                            <imageName>${project.artifactId}</imageName>
+                            <mainClass>org.eshishkin.edu.demospringnative.DemoSpringNativeApplication</mainClass>
+                            <buildArgs>
+                                <buildArg>
+                                    --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization --gc=G1 -H:+UseCompressedReferences
+                                </buildArg>
                             </buildArgs>
                         </configuration>
                         <executions>
