@@ -1,5 +1,5 @@
 FROM debian:stable-slim AS builder
-ARG PROFILE=enterprise-g1
+ARG PROFILE=enterprise-g1-gc
 
 COPY distr/graalvm.tar.gz graalvm.tar.gz
 COPY distr/native-image.jar native-image.jar
@@ -24,12 +24,13 @@ WORKDIR project
 COPY pom.xml pom.xml
 COPY src src
 RUN mvn -P$PROFILE -f pom.xml -B de.qaware.maven:go-offline-maven-plugin:1.2.5:resolve-dependencies
-RUN mvn clean package -P$PROFILE
-
+COPY etc/pgo etc/pgo
+RUN mvn clean package -P$PROFILE -e
 
 FROM paketobuildpacks/run:tiny-cnb
+WORKDIR app
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
 COPY --from=builder /lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/libgcc_s.so.1
-COPY --from=builder /project/target/demo-spring-native application
+COPY --from=builder /project/target/demo-spring-native /application
 
 ENTRYPOINT ["/application"]

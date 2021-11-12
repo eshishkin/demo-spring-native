@@ -21,6 +21,7 @@
         <spring-native.version>0.10.4</spring-native.version>
         <native.plugin.version>0.9.7.1</native.plugin.version>
 
+        <native.plugin.skip>true</native.plugin.skip>
         <artifact.image.native.jmx.deleted>true</artifact.image.native.jmx.deleted>
         <artifact.image.native.yaml.deleted>true</artifact.image.native.yaml.deleted>
         <artifact.image.native.xml.deleted>true</artifact.image.native.xml.deleted>
@@ -134,6 +135,29 @@
                     </image>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native.plugin.version}</version>
+                <configuration>
+                    <skip>${native.plugin.skip}</skip>
+                    <imageName>${project.artifactId}</imageName>
+                    <mainClass>org.eshishkin.edu.demospringnative.DemoSpringNativeApplication</mainClass>
+                    <buildArgs>
+                        <buildArg>${artifact.builder.args}</buildArg>
+                    </buildArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-native</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -185,71 +209,54 @@
 
             <properties>
                 <maven.test.skip>true</maven.test.skip>
-                <!-- Avoid a clash between Spring Boot repackaging and native-maven-plugin -->
                 <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>--verbose</artifact.builder.args>
             </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>${native.plugin.version}</version>
-                        <configuration>
-                            <imageName>${project.artifactId}</imageName>
-                            <mainClass>org.eshishkin.edu.demospringnative.DemoSpringNativeApplication</mainClass>
-                            <buildArgs>
-                                <buildArg>--verbose</buildArg>
-                            </buildArgs>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
 
         <profile>
-            <id>enterprise-g1</id>
+            <id>enterprise-g1-gc</id>
 
             <properties>
                 <maven.test.skip>true</maven.test.skip>
-                <!-- Avoid a clash between Spring Boot repackaging and native-maven-plugin -->
                 <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>--verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization --gc=G1 -H:+UseCompressedReferences</artifact.builder.args>
             </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>${native.plugin.version}</version>
-                        <configuration>
-                            <imageName>${project.artifactId}</imageName>
-                            <mainClass>org.eshishkin.edu.demospringnative.DemoSpringNativeApplication</mainClass>
-                            <buildArgs>
-                                <buildArg>
-                                    --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization --gc=G1 -H:+UseCompressedReferences
-                                </buildArg>
-                            </buildArgs>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+        </profile>
+
+        <profile>
+            <id>enterprise-serial-gc</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>--verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+UseCompressedReferences</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-serial-gc-pgo</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>-H:+ReportExceptionStackTraces -H:+UseCompressedReferences --pgo=${project.basedir}/etc/pgo/enterprise-tomcat-serial-gc.iprof</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-g1-gc-pgo</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>--verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+UseCompressedReferences --pgo=${project.basedir}/etc/pgo/enterprise-tomcat-g1-gc.iprof --gc=G1</artifact.builder.args>
+            </properties>
         </profile>
     </profiles>
 
