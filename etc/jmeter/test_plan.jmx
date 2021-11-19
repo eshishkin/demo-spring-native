@@ -48,7 +48,7 @@
           </elementProp>
           <elementProp name="PREPARATION_TIME" elementType="Argument">
             <stringProp name="Argument.name">PREPARATION_TIME</stringProp>
-            <stringProp name="Argument.value">5</stringProp>
+            <stringProp name="Argument.value">45</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="DELAY" elementType="Argument">
