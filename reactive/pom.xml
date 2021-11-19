@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>org.eshishkin.edu</groupId>
+    <artifactId>demo-spring-native-reactive</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>demo-spring-native-reactive</name>
+    <description>Demo application for Spring Native (Netty)</description>
+
+    <properties>
+        <java.version>11</java.version>
+        <repackage.classifier/>
+        <spring-cloud.version>2020.0.4</spring-cloud.version>
+        <spring-native.version>0.10.4</spring-native.version>
+        <native.plugin.version>0.9.7.1</native.plugin.version>
+
+        <native.plugin.skip>true</native.plugin.skip>
+        <artifact.image.native.jmx.deleted>true</artifact.image.native.jmx.deleted>
+        <artifact.image.native.yaml.deleted>true</artifact.image.native.yaml.deleted>
+        <artifact.image.native.xml.deleted>true</artifact.image.native.xml.deleted>
+        <artifact.image.native.spel.deleted>true</artifact.image.native.spel.deleted>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-sleuth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing.brave</groupId>
+            <artifactId>brave-opentracing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.experimental</groupId>
+            <artifactId>spring-native</artifactId>
+            <version>${spring-native.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.experimental</groupId>
+                <artifactId>spring-aot-maven-plugin</artifactId>
+                <version>${spring-native.version}</version>
+                <configuration>
+                    <removeSpelSupport>${artifact.image.native.spel.deleted}</removeSpelSupport>
+                    <removeXmlSupport>${artifact.image.native.xml.deleted}</removeXmlSupport>
+                    <removeYamlSupport>${artifact.image.native.yaml.deleted}</removeYamlSupport>
+                    <removeJmxSupport>${artifact.image.native.jmx.deleted}</removeJmxSupport>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>test-generate</id>
+                        <goals>
+                            <goal>test-generate</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                    <classifier>${repackage.classifier}</classifier>
+                    <image>
+                        <builder>${artifact.builder.name}</builder>
+                        <name>${artifact.image.name}</name>
+                        <verboseLogging>true</verboseLogging>
+                        <env>
+                            <BP_NATIVE_IMAGE>${artifact.image.native}</BP_NATIVE_IMAGE>
+                            <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>${artifact.builder.args}</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        </env>
+                    </image>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native.plugin.version}</version>
+                <configuration>
+                    <skip>${native.plugin.skip}</skip>
+                    <imageName>${project.artifactId}</imageName>
+                    <mainClass>org.eshishkin.edu.demospringnative.DemoSpringNativeApplication</mainClass>
+                    <buildArgs>
+                        <buildArg>${artifact.builder.args}</buildArg>
+                    </buildArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-native</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <profiles>
+        <profile>
+            <id>jvm</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <artifact.builder.name>paketobuildpacks/builder:base</artifact.builder.name>
+                <artifact.image.name>eshishkin/demo/spring-native/jvm-reactive</artifact.image.name>
+                <artifact.image.native>false</artifact.image.native>
+                <artifact.builder.args/>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>native-debug</id>
+            <properties>
+                <artifact.builder.name>paketobuildpacks/builder:base</artifact.builder.name>
+                <artifact.image.name>eshishkin/demo/spring-native/base-debug-reactive</artifact.image.name>
+                <artifact.image.native>true</artifact.image.native>
+                <artifact.builder.args>
+                    -g --verbose -H:+AllowVMInspection -H:+ReportExceptionStackTraces -H:+PrintClassInitialization
+                </artifact.builder.args>
+                <artifact.image.native.jmx.deleted>false</artifact.image.native.jmx.deleted>
+                <artifact.image.native.yaml.deleted>false</artifact.image.native.yaml.deleted>
+                <artifact.image.native.xml.deleted>false</artifact.image.native.xml.deleted>
+                <artifact.image.native.spel.deleted>false</artifact.image.native.spel.deleted>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>native-prod-tiny</id>
+            <properties>
+                <artifact.builder.name>paketobuildpacks/builder:tiny</artifact.builder.name>
+                <artifact.image.name>eshishkin/demo/spring-native/tiny-reactive</artifact.image.name>
+                <artifact.image.native>true</artifact.image.native>
+                <artifact.builder.args>
+                    --verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+AllowVMInspection
+                </artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>liberica</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>--verbose</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-g1-gc</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>--verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization --gc=G1 -H:+UseCompressedReferences</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-serial-gc</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>--verbose -H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+UseCompressedReferences</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-serial-gc-pgo</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>-H:+ReportExceptionStackTraces -H:+UseCompressedReferences --pgo=${project.basedir}/etc/pgo/enterprise-netty-serial-gc.iprof</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-g1-gc-pgo</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>-H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+UseCompressedReferences --pgo=${project.basedir}/etc/pgo/enterprise-netty-g1-gc.iprof --gc=G1</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-serial-gc-pgo-agent</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>-H:+ReportExceptionStackTraces -H:+UseCompressedReferences --pgo-instrument</artifact.builder.args>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>enterprise-g1-gc-pgo-agent</id>
+
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <repackage.classifier>exec</repackage.classifier>
+                <native.plugin.skip>false</native.plugin.skip>
+                <artifact.builder.args>-H:+ReportExceptionStackTraces -H:+PrintClassInitialization -H:+UseCompressedReferences --pgo-instrument --gc=G1</artifact.builder.args>
+            </properties>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>spring-releases</id>
+            <name>Spring Releases</name>
+            <url>https://repo.spring.io/release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-releases</id>
+            <name>Spring Releases</name>
+            <url>https://repo.spring.io/release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>

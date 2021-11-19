@@ -8,10 +8,17 @@ scrape_configs:
     metrics_path: "/admin/prometheus"
     static_configs:
       - targets:
-        - contract-service-native:8080
-        - contract-service-jvm:8080
-        - contract-service-liberica:8080
-        - contract-service-native-ee:8080
+        - contract-service-jvm-tomcat:8080
+        - contract-service-native-tomcat:8080
+        - contract-service-liberica-tomcat:8080
+        - contract-service-liberica-netty:8080
+        - contract-service-native-ee-g1-tomcat:8080
+        - contract-service-native-ee-g1-pgo-tomcat:8080
+        - contract-service-native-ee-g1-reactive:8080
+        - contract-service-native-ee-serial-reactive:8080
+        - contract-service-native-ee-serial-pgo-reactive:8080
+        - contract-service-native-netty:8080
+        - contract-service-jvm-netty: 8080s
 
   - job_name: cadvisor
     scrape_interval: 5s

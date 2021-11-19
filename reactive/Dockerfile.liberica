@@ -11,13 +11,13 @@ RUN apk add zlib-dev
 ENV NIK_HOME /opt/bellsoft/liberica-vm-core-21.3.0-openjdk11/bin
 ENV JAVA_HOME /opt/bellsoft/liberica-vm-core-21.3.0-openjdk11
 
-COPY pom.xml pom.xml
-COPY src src
+COPY reactive/pom.xml pom.xml
+COPY reactive/src src
 RUN mvn -Pliberica -f pom.xml -B de.qaware.maven:go-offline-maven-plugin:1.2.5:resolve-dependencies
 RUN mvn clean package -Pliberica
 
 FROM alpine:3.13.6
 RUN apk upgrade --no-cache && apk add --no-cache libstdc++
-COPY --from=builder /tools/target/demo-spring-native application
+COPY --from=builder /tools/target/demo-spring-native-reactive application
 
 ENTRYPOINT ["/application"]

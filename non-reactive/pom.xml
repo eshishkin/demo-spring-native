@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.eshishkin.edu</groupId>
-    <artifactId>demo-spring-native</artifactId>
+    <artifactId>demo-spring-native-tomcat</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo-spring-native</name>
-    <description>Demo application for Spring Native</description>
+    <name>demo-spring-native-tomcat</name>
+    <description>Demo application for Spring Native (Tomcat)</description>
 
     <properties>
         <java.version>11</java.version>
