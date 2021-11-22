@@ -216,31 +216,31 @@ services:
       backend:
         aliases:
           - contract-service-native-netty
-#
-#  app-liberica-netty:
-#    image: eshishkin/demo/spring-native/liberica-nik-netty
-#    mem_limit: 250m
-#    cpus: 1
-#    expose:
-#      - "8080"
-#    ports:
-#      - "18091:8080"
-#    command: [
-#        "-Xms128m",
-#        "-Xmx128m",
-#        "-Xss512k",
-#      #      "-XX:+PrintGC",
-#      #      "-XX:+PrintGCSummary",
-#      #      "-XX:+PrintGCTimeStamps",
-#      #      "-XX:+VerboseGC",
-#        "--spring.data.mongodb.uri=mongodb://mongo-service:27017",
-#    ]
-#    depends_on:
-#      - mongo
-#    networks:
-#      backend:
-#        aliases:
-#          - contract-service-liberica-netty
+
+  app-liberica-netty:
+    image: eshishkin/demo/spring-native/liberica-nik-netty
+    mem_limit: 250m
+    cpus: 1
+    expose:
+      - "8080"
+    ports:
+      - "18091:8080"
+    command: [
+        "-Xms128m",
+        "-Xmx128m",
+        "-Xss512k",
+      #      "-XX:+PrintGC",
+      #      "-XX:+PrintGCSummary",
+      #      "-XX:+PrintGCTimeStamps",
+      #      "-XX:+VerboseGC",
+        "--spring.data.mongodb.uri=mongodb://mongo-service:27017",
+    ]
+    depends_on:
+      - mongo
+    networks:
+      backend:
+        aliases:
+          - contract-service-liberica-netty
 
   prometheus:
     image: prom/prometheus:latest
