@@ -242,6 +242,26 @@ services:
         aliases:
           - contract-service-liberica-netty
 
+  app-jvm-netty:
+    image: eshishkin/demo/spring-native/jvm-reactive
+    mem_limit: 650m
+    cpus: 1
+    expose:
+      - "8080"
+    ports:
+      - "18090:8080"
+    environment:
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xss512k -Xmx128m -XX:MaxMetaspaceSize=100M -XX:ReservedCodeCacheSize=60M -XX:+UseContainerSupport -XX:+AlwaysActAsServerClassMachine -XX:+AlwaysPreTouch
+    command: [
+        "--spring.data.mongodb.uri=mongodb://mongo-service:27017",
+    ]
+    depends_on:
+      - mongo
+    networks:
+      backend:
+        aliases:
+          - contract-service-jvm-netty
+
   prometheus:
     image: prom/prometheus:latest
     cpus: 0.15
