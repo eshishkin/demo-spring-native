@@ -18,7 +18,7 @@ scrape_configs:
         - contract-service-native-ee-serial-reactive:8080
         - contract-service-native-ee-serial-pgo-reactive:8080
         - contract-service-native-netty:8080
-        - contract-service-jvm-netty: 8080s
+        - contract-service-jvm-netty:8080
 
   - job_name: cadvisor
     scrape_interval: 5s
