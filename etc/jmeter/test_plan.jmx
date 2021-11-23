@@ -25,13 +25,13 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="RPM" elementType="Argument">
             <stringProp name="Argument.name">RPM</stringProp>
-            <stringProp name="Argument.value">3000</stringProp>
+            <stringProp name="Argument.value">6000</stringProp>
             <stringProp name="Argument.desc">Requests per minute</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="DURATION" elementType="Argument">
             <stringProp name="Argument.name">DURATION</stringProp>
-            <stringProp name="Argument.value">600</stringProp>
+            <stringProp name="Argument.value">30</stringProp>
             <stringProp name="Argument.desc">Test run duration for each thread group (in seconds)</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
@@ -43,13 +43,13 @@
           </elementProp>
           <elementProp name="RAMP_UP_PERIOD" elementType="Argument">
             <stringProp name="Argument.name">RAMP_UP_PERIOD</stringProp>
-            <stringProp name="Argument.value">15</stringProp>
+            <stringProp name="Argument.value">10</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
             <stringProp name="Argument.desc">Ramp up period for each test case (in seconds)</stringProp>
           </elementProp>
           <elementProp name="PREPARATION_TIME" elementType="Argument">
             <stringProp name="Argument.name">PREPARATION_TIME</stringProp>
-            <stringProp name="Argument.value">45</stringProp>
+            <stringProp name="Argument.value">90</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
             <stringProp name="Argument.desc">Time for initial data creation (in seconds)</stringProp>
           </elementProp>
@@ -141,7 +141,7 @@
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
-          <stringProp name="HTTPSampler.port">${JVM_TOMCAT_PORT}</stringProp>
+          <stringProp name="HTTPSampler.port">${NATIVE_TOMCAT_PORT}</stringProp>
           <stringProp name="HTTPSampler.protocol">http</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/contracts/random?size=10000</stringProp>
